@@ -1,0 +1,133 @@
+module JDSTBU(
+	output [7:0] R, G, B,
+	output reg [3:0] COMM,
+	output reg [0:7] SevenSeg,
+	input CLK,
+	input JD,ST,BU);
+	
+	parameter logic [7:0] EJD [7:0] = '{8'b01111110,
+													8'b00111100,
+													8'b10011001,
+													8'b11000011,
+													8'b11000011,
+													8'b10011001,
+													8'b00111100,
+													8'b01111110};
+													
+	parameter logic [7:0] EST [7:0] = '{8'b00000000,
+													8'b01111110,
+													8'b01111110,
+													8'b01111110,
+													8'b01111110,
+													8'b01111110,
+													8'b01111110,
+													8'b00000000};
+													
+	parameter logic [7:0] EBU [7:0] = '{8'b00000000,
+													8'b00000000,
+													8'b00000000,
+													8'b00000000,
+													8'b00000000,
+													8'b00000000,
+													8'b00000000,
+													8'b00000000};
+													
+	parameter logic [7:0] END [7:0] = '{8'b00000000,
+													8'b01111111,
+													8'b01111111,
+													8'b00000000,
+													8'b00000000,
+													8'b01111111,
+													8'b01111111,
+													8'b00000000};
+													
+													
+	CLK_one F1(CLK, CLK_1); CLK_two F2(CLK, CLK_2);
+	int score;int health;bit [2:0] cnt;int guess;
+	
+	initial
+		begin
+			cnt = 0;
+			guess = 0;
+			score = 0;
+			health = 3;
+			G = 8'b11111111;
+			B = 8'b11111111;
+			R = 8'b11111111;
+			COMM = 4'b1000;
+			SevenSeg = 8'b00000010;
+		end
+	
+	always @(posedge CLK_1) 
+		  begin
+				if(JD == 1 || ST == 1 || BU == 1)
+					begin
+						if(guess == 0)
+							begin
+								if(cnt>=7)
+									cnt = 0;
+								else
+									cnt = cnt + 1;
+									COMM = {1'b1,cnt};
+									R = 	JD[cnt];
+							end
+						else if(guess == 1)
+							begin
+								if(cnt>=7)
+									cnt = 0;
+								else
+									cnt = cnt + 1;
+									COMM = {1'b1,cnt};
+									R = 	ST[cnt];
+							end
+						else
+							begin
+								if(cnt>=7)
+									cnt = 0;
+								else
+									cnt = cnt + 1;
+									COMM = {1'b1,cnt};
+									R = 	BU[cnt];
+							end
+					end
+			end
+			
+endmodule
+	
+	always @(posedge CLK_2) 
+		  begin
+				if(guess == 2)
+					guess = 0;
+				else
+					guess = guess + 1;
+		  end
+	endmodule
+	
+	module CLK_one(input CLK, output reg CLK_1); 
+	reg [24:0] Count; 
+	always @(posedge CLK) 
+		begin 
+			if(Count > 30000) 
+				begin 
+					Count <= 25'b0; 
+					CLK_1 <= ~CLK_1; 
+				end 
+			else Count <= Count + 1'b1; 
+		end 
+endmodule
+
+
+module CLK_two(input CLK, output reg CLK_2); 
+	reg [24:0] Count; 
+	always @(posedge CLK) 
+		begin 
+			if(Count >= 25000000) 
+				begin 
+					Count <= 25'b0; 
+					CLK_2<= ~CLK_2; 
+				end 
+			else Count <= Count + 1'b1; 
+		end 
+endmodule
+
+					
